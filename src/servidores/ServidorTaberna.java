@@ -19,7 +19,7 @@ public class ServidorTaberna implements Runnable {
         ServerSocket receptor = null;
         try {
             receptor = new ServerSocket(Constantes.PUERTO_TABERNA);
-            System.out.println("Servidor de la taberna iniciado correctamente en el puerto " + Constantes.PUERTO_TABERNA);
+            System.out.println("Taberna: El establecimiento ha abierto sus puertas en el puerto " + Constantes.PUERTO_TABERNA);
             while (true) {
                 Socket conexionEntrante = receptor.accept();
                 GestorDeVisitante hilo = new GestorDeVisitante(conexionEntrante);
@@ -56,8 +56,10 @@ public class ServidorTaberna implements Runnable {
 
                     if (esDama) {
                         damaEnSala = true;
+                        System.out.println("Taberna: La Dama Elisabetha ha cruzado el umbral del establecimiento.");
                     } else {
                         guerreroEnSala = true;
+                        System.out.println("Taberna: El Caballero Lance ha entrado buscando un momento de reposo.");
                     }
 
                     if (damaEnSala && guerreroEnSala) {
@@ -83,9 +85,13 @@ public class ServidorTaberna implements Runnable {
                     if (selloDeCruce) {
                         if (!lazoForjadoPreviamente) {
                             puntosResultantes = 75;
+                            System.out.println("Taberna: Primer encuentro entre Elisabetha y Lance confirmado. Se otorgan 75 puntos de chispa.");
                         } else {
                             puntosResultantes = 25;
+                            System.out.println("Taberna: Reencuentro entre la Dama y el Caballero. Se otorgan 25 puntos adicionales.");
                         }
+                    } else {
+                        System.out.println("Taberna: " + identificador + " abandona el lugar sin haber coincidido con nadie.");
                     }
 
                     if (esDama) {
@@ -110,3 +116,4 @@ public class ServidorTaberna implements Runnable {
         }
     }
 }
+
