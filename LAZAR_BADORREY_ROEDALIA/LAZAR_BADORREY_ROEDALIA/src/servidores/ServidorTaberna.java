@@ -19,7 +19,7 @@ public class ServidorTaberna implements Runnable {
         ServerSocket receptor = null;
         try {
             receptor = new ServerSocket(Constantes.PUERTO_TABERNA);
-            System.out.println("Taberna: Servidor activo y escuchando en el puerto " + Constantes.PUERTO_TABERNA);
+            System.out.println("Servidor de la taberna iniciado correctamente en el puerto " + Constantes.PUERTO_TABERNA);
             while (true) {
                 Socket conexionEntrante = receptor.accept();
                 GestorDeVisitante hilo = new GestorDeVisitante(conexionEntrante);

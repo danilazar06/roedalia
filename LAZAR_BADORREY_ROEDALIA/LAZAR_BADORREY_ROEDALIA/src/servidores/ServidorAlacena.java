@@ -16,7 +16,7 @@ public class ServidorAlacena implements Runnable {
                 try (DataInputStream dis = new DataInputStream(s.getInputStream());
                      DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
 
-                    String accion = dis.readUTF(); // GUARDAR_E, GUARDAR_L, SACAR_E, SACAR_L
+                    String accion = dis.readUTF();
                     boolean exito = false;
 
                     synchronized (this) {

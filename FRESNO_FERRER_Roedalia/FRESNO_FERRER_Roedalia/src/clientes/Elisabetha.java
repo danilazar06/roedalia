@@ -47,8 +47,8 @@ public class Elisabetha extends Thread {
             gradoDeVinculo = resultado;
         }
 
-        System.out.println("Elisabetha - Nivel de vinculo actual: " + gradoDeVinculo
-                + " | Cruce previo confirmado: " + cruceOriginalRealizado);
+        System.out.println("Dama Elisabetha - Chispa actual: " + gradoDeVinculo
+                + " | Encuentro en Taberna: " + cruceOriginalRealizado);
     }
 
     public synchronized int getChispa() {
@@ -73,7 +73,7 @@ public class Elisabetha extends Thread {
             } catch (Exception ignorada) {
             }
         }
-        System.out.println("Elisabetha ha alcanzado el nivel maximo de vinculo (100).");
+        System.out.println("Dama Elisabetha ha alcanzado la chispa maxima (100). Su destino esta sellado.");
     }
 
     private void revisarCorrespondencia() throws InterruptedException {
@@ -89,7 +89,7 @@ public class Elisabetha extends Thread {
         if (probabilidad < 0.20) {
             Thread.sleep(5000);
             modificarChispa(-5);
-            System.out.println("Elisabetha asistio a una gala real y sufrio desgaste (-5).");
+            System.out.println("Dama Elisabetha: Asistio a un compromiso de la corte y perdio chispa (-5).");
         }
     }
 

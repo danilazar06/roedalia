@@ -34,7 +34,7 @@ public class Alquimista extends Thread {
 
     private void prepararBrebajes() {
         try {
-            System.out.println("Alquimista: Analizando formulas en sus calderos (30s)...");
+            System.out.println("[Hechicero] Preparando ingredientes oscuros en silencio (30s)...");
             Thread.sleep(30000);
             double suerte = generador.nextDouble();
             if (suerte < 0.30) {
@@ -42,7 +42,7 @@ public class Alquimista extends Thread {
             } else if (suerte < 0.60) {
                 gestionarInventario("GUARDAR_L");
             } else {
-                System.out.println("Alquimista: La pocion no cristalizo y se desecho.");
+                System.out.println("[Hechicero] La mezcla se ha arruinado.");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -69,28 +69,28 @@ public class Alquimista extends Thread {
     private void buscarGuerrero() {
         if (gestionarInventario("SACAR_L")) {
             try {
-                System.out.println("Alquimista: Enviando una provocacion sutil hacia Lance...");
+                System.out.println("[Hechicero] Enviando mensajero oscuro a Lance...");
                 Thread.sleep(7000);
 
                 double accion = generador.nextDouble();
                 if (accion < 0.80) {
                     if (generador.nextDouble() < 0.20) {
                         protagonistaMasculino.modificarChispa(-20);
-                        System.out.println("Alquimista: Lance cayo en la trampa y su moral se resintio (-20).");
+                        System.out.println("[Hechicero] Lance duda de su lealtad al reino (-20).");
                     } else {
-                        System.out.println("Alquimista: El caballero Lance ignoro la provocacion.");
+                        System.out.println("[Hechicero] El caballero ignoró mis provocaciones.");
                     }
                 } else {
                     if (generador.nextDouble() < 0.20) {
                         protagonistaMasculino.modificarChispa(-30);
-                        System.out.println("Alquimista: Las sombras del Norte debilitaron gravemente a Lance (-30).");
+                        System.out.println("[Hechicero] Las sombras del Norte aterrorizan al guerrero (-30).");
                     } else {
-                        System.out.println("Alquimista: Lance demostro gran fortaleza ante la amenaza.");
+                        System.out.println("[Hechicero] El guerrero mostró una voluntad de hierro.");
                     }
                 }
             } catch (Exception e) {}
         } else {
-            System.out.println("Alquimista: Sin recursos en la alacena para atacar al caballero.");
+            System.out.println("[Hechicero] Carezco de motivos para molestar al caballero.");
         }
     }
 
@@ -105,4 +105,3 @@ public class Alquimista extends Thread {
         }
     }
 }
-

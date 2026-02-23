@@ -14,7 +14,6 @@ public class ServidorMercado implements Runnable {
             while (true) {
                 Socket s = server.accept();
                 try (DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
-                    // Elegir 1 aleatorio de una oferta de 5 simulada
                     List<String> oferta = new ArrayList<>(List.of(productos));
                     Collections.shuffle(oferta);
                     String item = oferta.get(0);

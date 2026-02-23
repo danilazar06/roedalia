@@ -49,8 +49,8 @@ public class Lance extends Thread {
             gradoDeVinculo = resultado;
         }
 
-        System.out.println("Caballero Lance - Chispa actual: " + gradoDeVinculo
-                + " | Encuentro en Taberna: " + cruceOriginalRealizado);
+        System.out.println("Lance - Nivel de vinculo actual: " + gradoDeVinculo
+                + " | Cruce previo confirmado: " + cruceOriginalRealizado);
     }
 
     public synchronized int getChispa() {
@@ -71,7 +71,7 @@ public class Lance extends Thread {
             } catch (Exception ignorada) {
             }
         }
-        System.out.println("Caballero Lance ha alcanzado la chispa maxima (100). Su destino esta sellado.");
+        System.out.println("Lance ha alcanzado el nivel maximo de vinculo (100).");
     }
 
     private void dialogarConGuardia() throws InterruptedException {

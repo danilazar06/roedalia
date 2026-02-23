@@ -30,7 +30,7 @@ public class CaballeroPorton extends Thread {
                             generador.nextDouble() < 0.25 ? "OFENSA" : "NORMAL",
                             25, TimeUnit.SECONDS
                     );
-                    if (!entregado) System.out.println("Caballero del Porton " + identificador + ": Lance no pudo atenderme a tiempo.");
+                    if (!entregado) System.out.println("Guardia " + identificador + ": Lance no puede atenderme ahora (Tiempo excedido).");
                 }
             } catch (InterruptedException e) {}
         }

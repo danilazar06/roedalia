@@ -2,7 +2,6 @@ package servidores;
 
 public class MainServidores {
     public static void main(String[] args) {
-        // Lanzamos los 4 servidores en paralelo
         new Thread(new ServidorTaberna()).start();
         new Thread(new ServidorMercado()).start();
         new Thread(new ServidorPorton()).start();
