@@ -1,88 +1,112 @@
 package servidores;
+
 import comun.Constantes;
-import java.io.*;
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class ServidorTaberna implements Runnable {
-    private boolean elisabethaIn = false;
-    private boolean lanceIn = false;
-    private boolean yaSeConocieron = false;
 
-    // LA CLAVE MÁGICA: El sello que garantiza que la IA no falle la sincronización
-    private boolean encuentroProducido = false;
+    private boolean damaEnSala = false;
+    private boolean guerreroEnSala = false;
+    private boolean lazoForjadoPreviamente = false;
+    private boolean selloDeCruce = false;
 
     @Override
     public void run() {
-        try (ServerSocket server = new ServerSocket(Constantes.PUERTO_TABERNA)) {
-            System.out.println("LOG SERV: Taberna abierta en puerto " + Constantes.PUERTO_TABERNA);
+        ServerSocket receptor = null;
+        try {
+            receptor = new ServerSocket(Constantes.PUERTO_TABERNA);
+            System.out.println("Servidor de la taberna iniciado correctamente en el puerto " + Constantes.PUERTO_TABERNA);
             while (true) {
-                new Handler(server.accept()).start();
+                Socket conexionEntrante = receptor.accept();
+                GestorDeVisitante hilo = new GestorDeVisitante(conexionEntrante);
+                hilo.start();
             }
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException excepcion) {
+            excepcion.printStackTrace();
+        } finally {
+            if (receptor != null) {
+                try { receptor.close(); } catch (IOException ignorada) {}
+            }
+        }
     }
 
-    private class Handler extends Thread {
-        private Socket socket;
-        public Handler(Socket s) { this.socket = s; }
+    private class GestorDeVisitante extends Thread {
+
+        private final Socket canal;
+
+        GestorDeVisitante(Socket canalRecibido) {
+            this.canal = canalRecibido;
+        }
 
         @Override
         public void run() {
-            try (DataInputStream dis = new DataInputStream(socket.getInputStream());
-                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
+            try (DataInputStream lector = new DataInputStream(canal.getInputStream());
+                 DataOutputStream escritor = new DataOutputStream(canal.getOutputStream())) {
 
-                String nombre = dis.readUTF();
-                int puntosAEntregar = 0;
+                String identificador = lector.readUTF();
+                int puntosResultantes = 0;
 
                 synchronized (ServidorTaberna.this) {
-                    // 1. Entrar y anunciar presencia
-                    if (nombre.equals("Elisabetha")) elisabethaIn = true;
-                    else lanceIn = true;
 
-                    System.out.println("TABERNA: " + nombre + " ha entrado.");
+                    boolean esDama = "Elisabetha".equals(identificador);
 
-                    // 2. Si ya están los dos, SELLAMOS el encuentro y despertamos al otro
-                    if (elisabethaIn && lanceIn) {
-                        encuentroProducido = true;
+                    if (esDama) {
+                        damaEnSala = true;
+                    } else {
+                        guerreroEnSala = true;
+                    }
+
+                    if (damaEnSala && guerreroEnSala) {
+                        selloDeCruce = true;
                         ServidorTaberna.this.notifyAll();
                     } else {
-                        // 3. Si falta el otro, esperamos nuestro turno
-                        long tiempoEstancia = nombre.equals("Elisabetha") ? 5000 : 8000;
-                        long fin = System.currentTimeMillis() + tiempoEstancia;
+                        long milisDeEspera;
+                        if (esDama) {
+                            milisDeEspera = 8000;
+                        } else {
+                            milisDeEspera = 12000;
+                        }
+                        long instanteLimite = System.currentTimeMillis() + milisDeEspera;
 
-                        // Comprobamos el "sello" en lugar de la presencia cruda
-                        while (System.currentTimeMillis() < fin && !encuentroProducido) {
-                            long restante = fin - System.currentTimeMillis();
-                            if (restante > 0) {
-                                ServidorTaberna.this.wait(restante);
+                        while (!selloDeCruce && System.currentTimeMillis() < instanteLimite) {
+                            long diferencia = instanteLimite - System.currentTimeMillis();
+                            if (diferencia > 0) {
+                                ServidorTaberna.this.wait(diferencia);
                             }
                         }
                     }
 
-                    // 4. Calculamos los puntos basándonos en el sello inalterable
-                    if (encuentroProducido) {
-                        if (!yaSeConocieron) {
-                            puntosAEntregar = 75;
+                    if (selloDeCruce) {
+                        if (!lazoForjadoPreviamente) {
+                            puntosResultantes = 75;
                         } else {
-                            puntosAEntregar = 10;
+                            puntosResultantes = 25;
                         }
                     }
 
-                    // 5. Salir (ahora sí podemos poner la presencia a false sin miedo)
-                    if (nombre.equals("Elisabetha")) elisabethaIn = false;
-                    else lanceIn = false;
+                    if (esDama) {
+                        damaEnSala = false;
+                    } else {
+                        guerreroEnSala = false;
+                    }
 
-                    // 6. Reseteamos el sello SOLO cuando la taberna se queda totalmente vacía
-                    // Esto evita la condición de carrera y prepara la taberna para el futuro
-                    if (!elisabethaIn && !lanceIn) {
-                        encuentroProducido = false;
-                        if (puntosAEntregar == 75) yaSeConocieron = true;
+                    if (!damaEnSala && !guerreroEnSala) {
+                        if (puntosResultantes == 75) {
+                            lazoForjadoPreviamente = true;
+                        }
+                        selloDeCruce = false;
                     }
                 }
 
-                // 7. Enviar resultado fuera del synchronized
-                dos.writeInt(puntosAEntregar);
+                escritor.writeInt(puntosResultantes);
 
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception fallo) {
+                fallo.printStackTrace();
+            }
         }
     }
 }

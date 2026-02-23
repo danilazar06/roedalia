@@ -1,99 +1,141 @@
 package clientes;
+
 import comun.Constantes;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Elisabetha extends Thread {
-    private int chispa = 0;
-    private boolean seConocen = false;
+
+    private int gradoDeVinculo = 0;
+    private boolean cruceOriginalRealizado = false;
     public LinkedBlockingQueue<String> buzon;
+    private final Random dado = new Random();
 
-    public Elisabetha(LinkedBlockingQueue<String> buzon) { this.buzon = buzon; }
-
-    public synchronized void modificarChispa(int n) {
-        // Blindaje Nivel 100: Una vez alcanzado, nada lo baja
-        if (this.chispa == 100) return;
-
-        if (n == 75) {
-            chispa = 75;
-            seConocen = true;
-        } else {
-            int nueva = chispa + n;
-            // Tope de 30 antes de conocerse
-            if (!seConocen && n > 0) nueva = Math.min(30, nueva);
-            chispa = Math.max(0, Math.min(100, nueva));
-        }
-        System.out.println(">>> ELISABETHA: Chispa = " + chispa + " (Conoce a Lance: " + seConocen + ")");
+    public Elisabetha(LinkedBlockingQueue<String> buzon) {
+        this.buzon = buzon;
     }
 
-    public synchronized int getChispa() { return chispa; }
+    public synchronized void modificarChispa(int n) {
+        if (this.gradoDeVinculo == 100) {
+            return;
+        }
+
+        int ajuste = n;
+        if (ajuste <= -20) {
+            ajuste = -10;
+        }
+
+        if (ajuste == 75) {
+            gradoDeVinculo = 75;
+            cruceOriginalRealizado = true;
+        } else {
+            int resultado = gradoDeVinculo + ajuste;
+            if (!cruceOriginalRealizado && ajuste > 0) {
+                if (resultado > 30) {
+                    resultado = 30;
+                }
+            }
+            if (resultado < 0) {
+                resultado = 0;
+            }
+            if (resultado > 100) {
+                resultado = 100;
+            }
+            gradoDeVinculo = resultado;
+        }
+
+        System.out.println("Elisabetha - Nivel de vinculo actual: " + gradoDeVinculo
+                + " | Cruce previo confirmado: " + cruceOriginalRealizado);
+    }
+
+    public synchronized int getChispa() {
+        return gradoDeVinculo;
+    }
 
     @Override
     public void run() {
         while (getChispa() < 100) {
             try {
-                int r = (int)(Math.random() * 4); // 25% cada acción
-                switch(r) {
-                    case 0: atenderDamas(); break;
-                    case 1: asistirBaile(); break;
-                    case 2: leerPergaminos(); break;
-                    case 3: escaparse(); break;
+                int decision = dado.nextInt(4);
+                if (decision == 0) {
+                    revisarCorrespondencia();
+                } else if (decision == 1) {
+                    asistirAlBaileReal();
+                } else if (decision == 2) {
+                    consultarBiblioteca();
+                } else {
+                    abandonarResidencia();
                 }
-                Thread.sleep(1000); // Pausa entre acciones
-            } catch (Exception e) {}
+                Thread.sleep(1000);
+            } catch (Exception ignorada) {
+            }
         }
-        System.out.println("💖 ELISABETHA ALCANZÓ NIVEL 100 Y ESPERA EN LA VENTANA.");
+        System.out.println("Elisabetha ha alcanzado el nivel maximo de vinculo (100).");
     }
 
-    private void atenderDamas() throws InterruptedException {
+    private void revisarCorrespondencia() throws InterruptedException {
         Thread.sleep(4000);
-        String msg = buzon.poll();
-        if (msg != null && msg.equals("RUMOR")) modificarChispa(-5);
+        String mensaje = buzon.poll();
+        if (mensaje != null && mensaje.equals("RUMOR")) {
+            modificarChispa(-5);
+        }
     }
 
-    private void asistirBaile() throws InterruptedException {
-        // Solo el 20% de las veces asiste inevitablemente
-        if (Math.random() < 0.20) {
+    private void asistirAlBaileReal() throws InterruptedException {
+        double probabilidad = dado.nextDouble();
+        if (probabilidad < 0.20) {
             Thread.sleep(5000);
             modificarChispa(-5);
-            System.out.println("ELISABETHA: Asistió forzada a un baile (-5)");
-        } else {
-            System.out.println("ELISABETHA: Esquivó el baile con éxito.");
+            System.out.println("Elisabetha asistio a una gala real y sufrio desgaste (-5).");
         }
     }
 
-    private void leerPergaminos() throws InterruptedException {
+    private void consultarBiblioteca() throws InterruptedException {
         Thread.sleep(5000);
-        if (Math.random() < 0.5) {
-            modificarChispa(-7); // Pergaminos soporíferos
+        boolean resultadoNegativo = dado.nextBoolean();
+        if (resultadoNegativo) {
+            modificarChispa(-7);
         } else {
-            modificarChispa(5); // Leyendas de caballeros
+            modificarChispa(5);
         }
     }
 
-    private void escaparse() {
-        if (Math.random() < 0.5) visitarMercado();
-        else visitarTaberna();
+    private void abandonarResidencia() {
+        boolean optaPorComercio = dado.nextBoolean();
+        if (optaPorComercio) {
+            visitarMercado();
+        } else {
+            acudirATaberna();
+        }
     }
 
     private void visitarMercado() {
-        try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_MERCADO);
-             DataInputStream dis = new DataInputStream(s.getInputStream())) {
+        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_MERCADO);
+             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
             Thread.sleep(5000);
-            String item = dis.readUTF();
-            System.out.println("ELISABETHA: Compró en el mercado: " + item);
-        } catch (Exception e) {}
+            flujoEntrada.readUTF();
+        } catch (Exception ignorada) {
+        }
     }
 
-    private void visitarTaberna() {
-        try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
-             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-             DataInputStream dis = new DataInputStream(s.getInputStream())) {
+    private void acudirATaberna() {
+        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
+             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
+             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
 
-            dos.writeUTF("Elisabetha");
-            int res = dis.readInt();
-            if (res > 0) modificarChispa(res == 75 ? 75 : 10);
-        } catch (Exception e) {}
+            flujoSalida.writeUTF("Elisabetha");
+            int valorRecibido = flujoEntrada.readInt();
+            if (valorRecibido > 0) {
+                if (valorRecibido == 75) {
+                    modificarChispa(75);
+                } else {
+                    modificarChispa(25);
+                }
+            }
+        } catch (Exception ignorada) {
+        }
     }
 }

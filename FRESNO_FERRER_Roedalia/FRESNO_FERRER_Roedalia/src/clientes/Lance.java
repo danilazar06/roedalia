@@ -1,90 +1,133 @@
 package clientes;
+
 import comun.Constantes;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Lance extends Thread {
-    private int chispa = 0;
-    private boolean seConocen = false;
+
+    private int gradoDeVinculo = 0;
+    private boolean cruceOriginalRealizado = false;
     public LinkedBlockingQueue<String> buzon;
+    private final Random dado = new Random();
 
-    public Lance(LinkedBlockingQueue<String> buzon) { this.buzon = buzon; }
-
-    public synchronized void modificarChispa(int n) {
-        // Blindaje Nivel 100
-        if (this.chispa == 100) return;
-
-        if (n == 75) {
-            chispa = 75;
-            seConocen = true;
-        } else {
-            int nueva = chispa + n;
-            // Tope de 50 antes de conocerse
-            if (!seConocen && n > 0) nueva = Math.min(50, nueva);
-            chispa = Math.max(0, Math.min(100, nueva));
-        }
-        System.out.println(">>> LANCE: Chispa actual = " + chispa);
+    public Lance(LinkedBlockingQueue<String> buzon) {
+        this.buzon = buzon;
     }
 
-    public synchronized int getChispa() { return chispa; }
+    public synchronized void modificarChispa(int n) {
+        if (this.gradoDeVinculo == 100) {
+            return;
+        }
+
+        int ajuste = n;
+        if (ajuste == -20) {
+            ajuste = -10;
+        } else if (ajuste <= -30) {
+            ajuste = -15;
+        }
+
+        if (ajuste == 75) {
+            gradoDeVinculo = 75;
+            cruceOriginalRealizado = true;
+        } else {
+            int resultado = gradoDeVinculo + ajuste;
+            if (!cruceOriginalRealizado && ajuste > 0) {
+                if (resultado > 50) {
+                    resultado = 50;
+                }
+            }
+            if (resultado < 0) {
+                resultado = 0;
+            }
+            if (resultado > 100) {
+                resultado = 100;
+            }
+            gradoDeVinculo = resultado;
+        }
+
+        System.out.println("Lance - Nivel de vinculo actual: " + gradoDeVinculo
+                + " | Cruce previo confirmado: " + cruceOriginalRealizado);
+    }
+
+    public synchronized int getChispa() {
+        return gradoDeVinculo;
+    }
 
     @Override
     public void run() {
         while (getChispa() < 100) {
             try {
-                int r = (int)(Math.random() * 3);
-                switch(r) {
-                    case 0: hablarCompaneros(); break;
-                    case 1: realizarGuardia(); break;
-                    case 2: /* El duelo se dispara por mensaje de Caballero */ break;
+                int decision = dado.nextInt(3);
+                if (decision == 0) {
+                    dialogarConGuardia();
+                } else if (decision == 1) {
+                    recorrerMurallas();
                 }
                 Thread.sleep(1000);
-            } catch (Exception e) {}
+            } catch (Exception ignorada) {
+            }
         }
-        System.out.println("⚔️ LANCE ALCANZÓ NIVEL 100 Y VIGILA EL PORTÓN.");
+        System.out.println("Lance ha alcanzado el nivel maximo de vinculo (100).");
     }
 
-    private void hablarCompaneros() throws InterruptedException {
+    private void dialogarConGuardia() throws InterruptedException {
         Thread.sleep(4000);
-        String msg = buzon.poll();
-        if (msg != null && msg.equals("OFENSA")) desafiarDuelo();
-    }
-
-    private void desafiarDuelo() throws InterruptedException {
-        System.out.println("LANCE: ¡Duelo por honor!");
-        Thread.sleep(5000);
-        if (Math.random() < 0.20) {
-            modificarChispa(-5); // Daña gravemente al oponente (Se siente mal)
-        } else {
-            modificarChispa(7); // Vence sin dañar
+        String mensaje = buzon.poll();
+        if (mensaje != null && mensaje.equals("OFENSA")) {
+            resolverConflicto();
         }
     }
 
-    private void realizarGuardia() {
-        if (Math.random() < 0.5) inspeccionarPorton();
-        else visitarTaberna();
+    private void resolverConflicto() throws InterruptedException {
+        Thread.sleep(5000);
+        double suerte = dado.nextDouble();
+        if (suerte < 0.20) {
+            modificarChispa(-5);
+        } else {
+            modificarChispa(7);
+        }
     }
 
-    private void inspeccionarPorton() {
-        try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_PORTON);
-             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-             DataInputStream dis = new DataInputStream(s.getInputStream())) {
+    private void recorrerMurallas() {
+        boolean optaPorAcceso = dado.nextBoolean();
+        if (optaPorAcceso) {
+            inspeccionarAcceso();
+        } else {
+            acudirATaberna();
+        }
+    }
+
+    private void inspeccionarAcceso() {
+        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_PORTON);
+             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
+             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
 
             Thread.sleep(5000);
-            dos.writeUTF("INSPECCIONAR");
-            System.out.println("LANCE: " + dis.readUTF());
-        } catch (Exception e) {}
+            flujoSalida.writeUTF("INSPECCIONAR");
+            flujoEntrada.readUTF();
+        } catch (Exception ignorada) {
+        }
     }
 
-    private void visitarTaberna() {
-        try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
-             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-             DataInputStream dis = new DataInputStream(s.getInputStream())) {
+    private void acudirATaberna() {
+        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
+             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
+             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
 
-            dos.writeUTF("Lance");
-            int res = dis.readInt();
-            if (res > 0) modificarChispa(res == 75 ? 75 : 10);
-        } catch (Exception e) {}
+            flujoSalida.writeUTF("Lance");
+            int valorRecibido = flujoEntrada.readInt();
+            if (valorRecibido > 0) {
+                if (valorRecibido == 75) {
+                    modificarChispa(75);
+                } else {
+                    modificarChispa(25);
+                }
+            }
+        } catch (Exception ignorada) {
+        }
     }
 }
