@@ -1,31 +1,36 @@
 package clientes;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 public class CaballeroPorton extends Thread {
-    private String nombre;
-    private Lance lan;
-    private boolean herido = false;
+    private String identificador;
+    private Lance protagonistaMasculino;
+    private boolean requiereAsistencia = false;
+    private final Random generador = new Random();
 
-    public CaballeroPorton(String n, Lance l) { this.nombre = n; this.lan = l; }
+    public CaballeroPorton(String nombre, Lance l) {
+        this.identificador = nombre;
+        this.protagonistaMasculino = l;
+    }
 
-    public void herir() { herido = true; }
+    public void herir() { requiereAsistencia = true; }
 
     @Override
     public void run() {
         while (true) {
             try {
-                if (herido) {
-                    System.out.println("CABALLERO " + nombre + ": Herido... recuperando (30s).");
+                if (requiereAsistencia) {
+                    System.out.println("Guardia " + identificador + ": Reponiendo fuerzas tras la batalla (30s).");
                     Thread.sleep(30000);
-                    herido = false;
-                } else if (Math.random() < 0.5) { // Vigilancia
+                    requiereAsistencia = false;
+                } else if (generador.nextDouble() < 0.5) {
                     Thread.sleep(6000);
-                } else { // Hablar (Espera 25s)
-                    boolean ok = lan.buzon.offer(
-                            Math.random() < 0.25 ? "OFENSA" : "NORMAL",
+                } else {
+                    boolean entregado = protagonistaMasculino.buzon.offer(
+                            generador.nextDouble() < 0.25 ? "OFENSA" : "NORMAL",
                             25, TimeUnit.SECONDS
                     );
-                    if (!ok) System.out.println("CABALLERO " + nombre + ": Lance me ignoró (Timeout).");
+                    if (!entregado) System.out.println("Guardia " + identificador + ": Lance no puede atenderme ahora (Tiempo excedido).");
                 }
             } catch (InterruptedException e) {}
         }

@@ -3,107 +3,102 @@ package clientes;
 import comun.Constantes;
 import java.io.*;
 import java.net.Socket;
+import java.util.Random;
 
 public class Alquimista extends Thread {
-    private Elisabetha eli;
-    private Lance lan;
+    private Elisabetha protagonistaFemenina;
+    private Lance protagonistaMasculino;
+    private final Random generador = new Random();
 
     public Alquimista(Elisabetha e, Lance l) {
-        this.eli = e;
-        this.lan = l;
+        this.protagonistaFemenina = e;
+        this.protagonistaMasculino = l;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                double r = Math.random();
-                if (r < 0.60) {
-                    estudiar();
-                } else if (r < 0.80) {
-                    visitarEli();
+                double probabilidad = generador.nextDouble();
+                if (probabilidad < 0.60) {
+                    prepararBrebajes();
+                } else if (probabilidad < 0.80) {
+                    buscarDama();
                 } else {
-                    visitarLan();
+                    buscarGuerrero();
                 }
-                // Breve pausa para no saturar el procesador en el ciclo infinito
                 Thread.sleep(100);
-            } catch (Exception e) {
-                // Silencio en la mazmorra
-            }
+            } catch (Exception e) {}
         }
     }
 
-    private void estudiar() {
+    private void prepararBrebajes() {
         try {
-            System.out.println("ALQUIMISTA: Estudiando calderos (30s)...");
-            Thread.sleep(30000); // Tiempo de estudio según Canto Quinto
-            double ex = Math.random();
-            if (ex < 0.30) {
-                llamarAlacena("GUARDAR_E");
-            } else if (ex < 0.60) {
-                llamarAlacena("GUARDAR_L");
+            System.out.println("[Hechicero] Preparando ingredientes oscuros en silencio (30s)...");
+            Thread.sleep(30000);
+            double suerte = generador.nextDouble();
+            if (suerte < 0.30) {
+                gestionarInventario("GUARDAR_E");
+            } else if (suerte < 0.60) {
+                gestionarInventario("GUARDAR_L");
             } else {
-                System.out.println("ALQUIMISTA: Fracaso en la poción (40%).");
+                System.out.println("[Hechicero] La mezcla se ha arruinado.");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    private void visitarEli() {
-        // Solo puede visitar si hay poción disponible
-        if (llamarAlacena("SACAR_E")) {
+    private void buscarDama() {
+        if (gestionarInventario("SACAR_E")) {
             try {
-                System.out.println("ALQUIMISTA: Visitando a Elisabetha...");
-                Thread.sleep(5000); // Duración de la visita
-
-                // 30% de probabilidad de engaño con tónico de belleza
-                if (Math.random() < 0.30) {
-                    eli.modificarChispa(-20);
-                    System.out.println("ALQUIMISTA: ¡Éxito! Elisabetha bebió el tónico.");
+                System.out.println("[Hechicero] Acechando a la dama Elisabetha...");
+                Thread.sleep(5000);
+                if (generador.nextDouble() < 0.30) {
+                    protagonistaFemenina.modificarChispa(-20);
+                    System.out.println("[Hechicero] Excelente, la dama cayó en la trampa del falso tónico.");
                 } else {
-                    System.out.println("ALQUIMISTA: ¡Lamentos! Elisabetha no cayó en el engaño.");
+                    System.out.println("[Hechicero] Maldición, Elisabetha desconfió de mi ofrenda.");
                 }
             } catch (Exception e) {}
         } else {
-            System.out.println("ALQUIMISTA: Sin pociones para Elisabetha. Me lamento.");
+            System.out.println("[Hechicero] No dispongo de elixires para la dama en este momento.");
         }
     }
 
-    private void visitarLan() {
-        // Solo visita si hay excusa/poción disponible
-        if (llamarAlacena("SACAR_L")) {
+    private void buscarGuerrero() {
+        if (gestionarInventario("SACAR_L")) {
             try {
-                System.out.println("ALQUIMISTA: Citando a Lance al orden...");
-                Thread.sleep(7000); // Duración de la visita
+                System.out.println("[Hechicero] Enviando mensajero oscuro a Lance...");
+                Thread.sleep(7000);
 
-                double r = Math.random();
-                if (r < 0.80) { // Intento de Engaño (80%)
-                    if (Math.random() < 0.20) { // Probabilidad de éxito 20%
-                        lan.modificarChispa(-20);
-                        System.out.println("ALQUIMISTA: Lance cree haber fallado al reino (-20).");
+                double accion = generador.nextDouble();
+                if (accion < 0.80) {
+                    if (generador.nextDouble() < 0.20) {
+                        protagonistaMasculino.modificarChispa(-20);
+                        System.out.println("[Hechicero] Lance duda de su lealtad al reino (-20).");
                     } else {
-                        System.out.println("ALQUIMISTA: Lance ignoró la supuesta afrenta.");
+                        System.out.println("[Hechicero] El caballero ignoró mis provocaciones.");
                     }
-                } else { // Amenaza Frente Norte (20%)
-                    if (Math.random() < 0.20) { // Probabilidad de éxito 20%
-                        lan.modificarChispa(-30);
-                        System.out.println("ALQUIMISTA: Lance teme el Frente Norte (-30).");
+                } else {
+                    if (generador.nextDouble() < 0.20) {
+                        protagonistaMasculino.modificarChispa(-30);
+                        System.out.println("[Hechicero] Las sombras del Norte aterrorizan al guerrero (-30).");
                     } else {
-                        System.out.println("ALQUIMISTA: Lance no se deja amedrentar.");
+                        System.out.println("[Hechicero] El guerrero mostró una voluntad de hierro.");
                     }
                 }
             } catch (Exception e) {}
         } else {
-            System.out.println("ALQUIMISTA: No tengo excusas para citar a Lance.");
+            System.out.println("[Hechicero] Carezco de motivos para molestar al caballero.");
         }
     }
 
-    private boolean llamarAlacena(String cmd) {
+    private boolean gestionarInventario(String comando) {
         try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_ALACENA);
              DataOutputStream dos = new DataOutputStream(s.getOutputStream());
              DataInputStream dis = new DataInputStream(s.getInputStream())) {
-            dos.writeUTF(cmd);
+            dos.writeUTF(comando);
             return dis.readBoolean();
         } catch (Exception e) {
             return false;

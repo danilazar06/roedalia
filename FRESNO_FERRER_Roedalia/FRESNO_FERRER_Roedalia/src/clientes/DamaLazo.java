@@ -1,24 +1,29 @@
 package clientes;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 public class DamaLazo extends Thread {
-    private String nombre;
-    private Elisabetha eli;
+    private String identificador;
+    private Elisabetha protagonistaFemenina;
+    private final Random generador = new Random();
 
-    public DamaLazo(String n, Elisabetha e) { this.nombre = n; this.eli = e; }
+    public DamaLazo(String nombre, Elisabetha e) {
+        this.identificador = nombre;
+        this.protagonistaFemenina = e;
+    }
 
     @Override
     public void run() {
         while (true) {
             try {
-                if (Math.random() < 0.5) { // Labores
+                if (generador.nextDouble() < 0.5) {
                     Thread.sleep(5000);
-                } else { // Rumores (Espera 20s)
-                    boolean ok = eli.buzon.offer(
-                            Math.random() < 0.5 ? "RUMOR" : "CONFIDENCIA",
+                } else {
+                    boolean entregado = protagonistaFemenina.buzon.offer(
+                            generador.nextDouble() < 0.5 ? "RUMOR" : "CONFIDENCIA",
                             20, TimeUnit.SECONDS
                     );
-                    if (!ok) System.out.println("DAMA " + nombre + ": Elisabetha me ignoró (Timeout).");
+                    if (!entregado) System.out.println("Cortesana " + identificador + ": La dama está demasiado ocupada (Tiempo excedido).");
                 }
             } catch (InterruptedException e) {}
         }
