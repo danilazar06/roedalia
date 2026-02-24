@@ -12,24 +12,24 @@ public class ServidorDepositoPociones implements Runnable {
     @Override
     public void run() {
         try (ServerSocket servidor = new ServerSocket(ParametrosReino.PUERTO_DEPOSITO_POCIONES)) {
-            System.out.println("🧪 El Depósito de Pociones de Roedalia abre en el puerto " + ParametrosReino.PUERTO_DEPOSITO_POCIONES);
-            
+            System.out.println("[Alacena] Servidor iniciado en puerto " + ParametrosReino.PUERTO_DEPOSITO_POCIONES);
+
             while (true) {
                 try (Socket conexion = servidor.accept();
                      BufferedReader lector = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
                      PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true)) {
 
-                    String instruccion = lector.readLine(); // ALMACENAR_E, ALMACENAR_L, RETIRAR_E, RETIRAR_L
+                    String instruccion = lector.readLine();
                     boolean operacionExitosa = gestionarPocion(instruccion);
                     
                     escritor.println(String.valueOf(operacionExitosa));
                     if (operacionExitosa) {
-                        System.out.println("📦 Operación completada: " + instruccion);
+                        System.out.println("[Alacena] Operacion: " + instruccion);
                     }
                 }
             }
         } catch (IOException e) {
-            System.err.println("❌ El Depósito de Pociones no pudo abrir sus cámaras: " + e.getMessage());
+            System.err.println("[Alacena] Error al iniciar servidor: " + e.getMessage());
         }
     }
 

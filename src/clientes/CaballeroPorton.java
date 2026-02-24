@@ -20,7 +20,7 @@ public class CaballeroPorton extends Thread {
         while (true) {
             try {
                 if (requiereAsistencia) {
-                    System.out.println("Caballero del Porton " + identificador + ": Recuperandose de sus heridas (30s).");
+                    System.out.println("[CaballeroPorton] " + identificador + ": Recuperandose (30s)");
                     Thread.sleep(30000);
                     requiereAsistencia = false;
                 } else if (generador.nextDouble() < 0.5) {
@@ -30,7 +30,7 @@ public class CaballeroPorton extends Thread {
                             generador.nextDouble() < 0.25 ? "OFENSA" : "NORMAL",
                             25, TimeUnit.SECONDS
                     );
-                    if (!entregado) System.out.println("Caballero del Porton " + identificador + ": Lance no pudo atenderme a tiempo.");
+                    if (!entregado) System.out.println("[CaballeroPorton] " + identificador + ": timeout con Lance");
                 }
             } catch (InterruptedException e) {}
         }

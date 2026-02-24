@@ -1,6 +1,6 @@
 package clientes;
 
-import comun.Constantes;
+import configuracion.ParametrosReino;
 import java.io.*;
 import java.net.Socket;
 import java.util.Random;
@@ -34,15 +34,15 @@ public class Alquimista extends Thread {
 
     private void prepararBrebajes() {
         try {
-            System.out.println("Alquimista: Analizando formulas en sus calderos (30s)...");
+            System.out.println("[Alquimista] Preparando pociones (30s)...");
             Thread.sleep(30000);
             double suerte = generador.nextDouble();
             if (suerte < 0.30) {
-                gestionarInventario("GUARDAR_E");
+                gestionarInventario("ALMACENAR_E");
             } else if (suerte < 0.60) {
-                gestionarInventario("GUARDAR_L");
+                gestionarInventario("ALMACENAR_L");
             } else {
-                System.out.println("Alquimista: La mezcla no alcanzo la consistencia deseada, descartando residuos.");
+                System.out.println("[Alquimista] Pocion fallida");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -50,59 +50,59 @@ public class Alquimista extends Thread {
     }
 
     private void buscarDama() {
-        if (gestionarInventario("SACAR_E")) {
+        if (gestionarInventario("RETIRAR_E")) {
             try {
-                System.out.println("Alquimista: Preparando una pocima destinada a la Dama Elisabetha...");
+                System.out.println("[Alquimista] Visitando a Elisabetha (5s)...");
                 Thread.sleep(5000);
                 if (generador.nextDouble() < 0.30) {
                     protagonistaFemenina.modificarChispa(-20);
-                    System.out.println("Alquimista: Elisabetha acepto la pocima sin sospechar del engano.");
+                    System.out.println("[Alquimista] Elisabetha acepto pocima (-20)");
                 } else {
-                    System.out.println("Alquimista: Elisabetha rechazo la pocima con cautela.");
+                    System.out.println("[Alquimista] Elisabetha rechazo la pocima");
                 }
             } catch (Exception e) {}
         } else {
-            System.out.println("Alquimista: No dispongo de elixires preparados para la Dama en este momento.");
+            System.out.println("[Alquimista] Sin pociones para Elisabetha");
         }
     }
 
     private void buscarGuerrero() {
-        if (gestionarInventario("SACAR_L")) {
-            try {
-                System.out.println("Alquimista: Enviando un emisario con un mensaje cifrado para Lance...");
-                Thread.sleep(7000);
+        try {
+            System.out.println("[Alquimista] Visitando a Lance (7s)...");
+            Thread.sleep(7000);
 
-                double accion = generador.nextDouble();
-                if (accion < 0.80) {
+            double accion = generador.nextDouble();
+            if (accion < 0.80) {
+                if (gestionarInventario("RETIRAR_L")) {
                     if (generador.nextDouble() < 0.20) {
                         protagonistaMasculino.modificarChispa(-20);
-                        System.out.println("Alquimista: Lance ha caido en la trampa del falso mensajero (-20).");
+                        System.out.println("[Alquimista] Lance afectado por pocima (-20)");
                     } else {
-                        System.out.println("Alquimista: El Caballero Lance desestimo las provocaciones del alquimista.");
+                        System.out.println("[Alquimista] Lance resistio la pocima");
                     }
                 } else {
-                    if (generador.nextDouble() < 0.20) {
-                        protagonistaMasculino.modificarChispa(-30);
-                        System.out.println("Alquimista: Las sombras del Norte perturban al Caballero (-30).");
-                    } else {
-                        System.out.println("Alquimista: Lance demostro una voluntad inquebrantable ante la amenaza.");
-                    }
+                    System.out.println("[Alquimista] Sin pociones para Lance");
                 }
-            } catch (Exception e) {}
-        } else {
-            System.out.println("Alquimista: Carezco de motivos suficientes para importunar al Caballero.");
-        }
+            } else {
+                if (generador.nextDouble() < 0.20) {
+                    protagonistaMasculino.modificarChispa(-30);
+                    System.out.println("[Alquimista] Lance afectado por amenaza (-30)");
+                } else {
+                    System.out.println("[Alquimista] Lance resistio la amenaza");
+                }
+            }
+        } catch (Exception e) {}
     }
 
     private boolean gestionarInventario(String comando) {
-        try (Socket s = new Socket(Constantes.HOST, Constantes.PUERTO_ALACENA);
-             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-             DataInputStream dis = new DataInputStream(s.getInputStream())) {
-            dos.writeUTF(comando);
-            return dis.readBoolean();
+        try (Socket s = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_DEPOSITO_POCIONES);
+             PrintWriter escritor = new PrintWriter(s.getOutputStream(), true);
+             BufferedReader lector = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+            escritor.println(comando);
+            String respuesta = lector.readLine();
+            return "true".equals(respuesta);
         } catch (Exception e) {
             return false;
         }
     }
 }
-

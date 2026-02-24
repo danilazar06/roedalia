@@ -23,7 +23,7 @@ public class DamaLazo extends Thread {
                             generador.nextDouble() < 0.5 ? "RUMOR" : "CONFIDENCIA",
                             20, TimeUnit.SECONDS
                     );
-                    if (!entregado) System.out.println("Dama del Lazo " + identificador + ": Elisabetha no pudo atenderme a tiempo.");
+                    if (!entregado) System.out.println("[DamaLazo] " + identificador + ": timeout con Elisabetha");
                 }
             } catch (InterruptedException e) {}
         }

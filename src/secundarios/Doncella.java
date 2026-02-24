@@ -12,7 +12,7 @@ public class Doncella extends Thread {
 
     public Doncella(String n) { 
         this.nombre = n; 
-        System.out.println("👥 La doncella " + nombre + " ha llegado a la corte");
+        System.out.println("[Dama del Lazo] " + nombre + " iniciada");
     }
 
     @Override
@@ -20,21 +20,19 @@ public class Doncella extends Thread {
         while (true) {
             try {
                 if (generadorAleatorio.nextDouble() < 0.5) {
-                    // Realizar labores domésticas
                     realizarLabores();
                 } else {
-                    // Compartir murmullos con Elisabetha
                     compartirMurmullo();
                 }
             } catch (InterruptedException e) {
-                System.err.println("⚠️ La doncella " + nombre + " fue interrumpida en sus tareas");
+                System.err.println("[Dama del Lazo] " + nombre + " interrumpida");
             }
         }
     }
 
     private void realizarLabores() throws InterruptedException {
         Thread.sleep(5000);
-        System.out.println("🧵 La doncella " + nombre + " completa sus labores en el castillo");
+        System.out.println("[Dama del Lazo] " + nombre + " completa labores (5s)");
     }
 
     private void compartirMurmullo() {
@@ -42,7 +40,6 @@ public class Doncella extends Thread {
              PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true);
              BufferedReader lector = new BufferedReader(new InputStreamReader(conexion.getInputStream()))) {
             
-            // Esperar respuesta por hasta 20 segundos
             conexion.setSoTimeout(20000);
             
             String mensaje = generadorAleatorio.nextDouble() < 0.5 ? "MURMURIO" : "CONFIDENCIA";
@@ -50,12 +47,12 @@ public class Doncella extends Thread {
             
             String respuesta = lector.readLine();
             if (respuesta != null && respuesta.equals("RECIBIDO")) {
-                System.out.println("🤫 La doncella " + nombre + " compartió sus pensamientos con Elisabetha");
+                System.out.println("[Dama del Lazo] " + nombre + " envio mensaje a Elisabetha");
             }
         } catch (SocketTimeoutException e) {
-            System.out.println("⏰ La doncella " + nombre + ": Elisabetha no pudo recibir el mensaje (timeout)");
+            System.out.println("[Dama del Lazo] " + nombre + ": timeout con Elisabetha");
         } catch (IOException e) {
-            System.err.println("⚠️ La doncella " + nombre + " no pudo contactar a Elisabetha: " + e.getMessage());
+            System.err.println("[Dama del Lazo] " + nombre + " error de conexion: " + e.getMessage());
         }
     }
 }

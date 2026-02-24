@@ -6,28 +6,31 @@ import java.net.*;
 import java.util.*;
 
 public class ServidorPlazaMercantil implements Runnable {
-    private final String[] mercancias = {"Queso artesanal", "Pan recién horneado", "Especias exóticas", "Telas finas", "Grosella silvestre", "Repelente de plagas", "Collar real", "Cucharon ceremonial"};
+    private final String[] mercancias = {
+        "Queso", "Pan recien horneado", "Especias del lejano oriente",
+        "Telas para vestidos", "Jugo de grosella", "Repelente de gatos",
+        "Collares de ratona", "Cucharas de boj"
+    };
 
     @Override
     public void run() {
         try (ServerSocket servidor = new ServerSocket(ParametrosReino.PUERTO_PLAZA_MERCANTIL)) {
-            System.out.println("🏪 La Plaza Mercantil de Roedalia abre en el puerto " + ParametrosReino.PUERTO_PLAZA_MERCANTIL);
-            
+            System.out.println("[Mercado] Servidor iniciado en puerto " + ParametrosReino.PUERTO_PLAZA_MERCANTIL);
+
             while (true) {
                 try (Socket conexion = servidor.accept();
                      PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true)) {
                     
-                    // Simular oferta limitada de 5 productos
                     List<String> ofertaDiaria = new ArrayList<>(Arrays.asList(mercancias));
                     Collections.shuffle(ofertaDiaria);
-                    String articuloSeleccionado = ofertaDiaria.get(0);
-                    
-                    escritor.println(articuloSeleccionado);
-                    System.out.println("💰 Venta realizada: " + articuloSeleccionado);
+                    List<String> oferta = ofertaDiaria.subList(0, 5);
+
+                    escritor.println(String.join(", ", oferta));
+                    System.out.println("[Mercado] Oferta: " + String.join(", ", oferta));
                 }
             }
         } catch (IOException e) {
-            System.err.println("❌ La Plaza Mercantil no pudo abrir sus puestos: " + e.getMessage());
+            System.err.println("[Mercado] Error al iniciar servidor: " + e.getMessage());
         }
     }
 }

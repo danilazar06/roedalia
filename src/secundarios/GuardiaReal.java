@@ -13,12 +13,12 @@ public class GuardiaReal extends Thread {
 
     public GuardiaReal(String n) { 
         this.nombre = n; 
-        System.out.println("🛡️ El guardia real " + nombre + " ha tomado su puesto");
+        System.out.println("[Caballero del Porton] " + nombre + " iniciado");
     }
 
     public void recibirHerida() { 
         herido = true; 
-        System.out.println("🩸 El guardia " + nombre + " ha sido herido en combate");
+        System.out.println("[Caballero del Porton] " + nombre + " herido");
     }
 
     @Override
@@ -33,21 +33,21 @@ public class GuardiaReal extends Thread {
                     dialogarConLance();
                 }
             } catch (InterruptedException e) {
-                System.err.println("⚠️ El guardia " + nombre + " fue interrumpido en su servicio");
+                System.err.println("[Caballero del Porton] " + nombre + " interrumpido");
             }
         }
     }
 
     private void recuperarseEnEnfermeria() throws InterruptedException {
-        System.out.println("🏥 El guardia " + nombre + " se recupera en la enfermería (30 segundos)");
+        System.out.println("[Caballero del Porton] " + nombre + " recuperandose (30s)");
         Thread.sleep(30000);
         herido = false;
-        System.out.println("💪 El guardia " + nombre + " ha sido dado de alta");
+        System.out.println("[Caballero del Porton] " + nombre + " recuperado");
     }
 
     private void realizarVigilancia() throws InterruptedException {
         Thread.sleep(6000);
-        System.out.println("👁️ El guardia " + nombre + " completa su ronda de vigilancia");
+        System.out.println("[Caballero del Porton] " + nombre + " ronda completada (6s)");
     }
 
     private void dialogarConLance() {
@@ -55,7 +55,6 @@ public class GuardiaReal extends Thread {
              PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true);
              BufferedReader lector = new BufferedReader(new InputStreamReader(conexion.getInputStream()))) {
             
-            // Esperar respuesta por hasta 25 segundos
             conexion.setSoTimeout(25000);
             
             String mensaje = generadorAleatorio.nextDouble() < 0.25 ? "AFRENTA" : "CONVERSACION";
@@ -63,12 +62,12 @@ public class GuardiaReal extends Thread {
             
             String respuesta = lector.readLine();
             if (respuesta != null && respuesta.equals("RECIBIDO")) {
-                System.out.println("🗣️ El guardia " + nombre + " ha dialogado con Lance");
+                System.out.println("[Caballero del Porton] " + nombre + " dialogo con Lance");
             }
         } catch (SocketTimeoutException e) {
-            System.out.println("⏰ El guardia " + nombre + ": Lance no pudo recibir el mensaje (timeout)");
+            System.out.println("[Caballero del Porton] " + nombre + ": timeout con Lance");
         } catch (IOException e) {
-            System.err.println("⚠️ El guardia " + nombre + " no pudo contactar a Lance: " + e.getMessage());
+            System.err.println("[Caballero del Porton] " + nombre + " error de conexion: " + e.getMessage());
         }
     }
 }

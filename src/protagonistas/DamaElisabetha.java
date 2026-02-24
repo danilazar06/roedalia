@@ -4,48 +4,47 @@ import configuracion.ParametrosReino;
 import java.io.*;
 import java.net.*;
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class DamaElisabetha extends Thread {
-    private int nivelAfinidad = 0;
+    private int nivelChispa = 0;
     private boolean encuentroRealizado = false;
     private ServerSocket servidorPersonal;
     private boolean servidorActivo = true;
     private Random generadorAleatorio = new Random();
+    private LinkedBlockingQueue<String> colaMensajesDamas = new LinkedBlockingQueue<>();
 
     public DamaElisabetha() {
         try {
             this.servidorPersonal = new ServerSocket(ParametrosReino.PUERTO_SERVIDOR_ELISA);
-            System.out.println("👑 La Dama Elisabetha ha establecido su canal privado en el puerto " + ParametrosReino.PUERTO_SERVIDOR_ELISA);
-            
-            // Iniciar hilo para escuchar mensajes de las damas
+            System.out.println("[Elisabetha] Servidor iniciado en puerto " + ParametrosReino.PUERTO_SERVIDOR_ELISA);
+
             new Thread(this::escucharMensajes).start();
         } catch (IOException e) {
-            System.err.println("❌ La Dama no pudo establecer su canal privado: " + e.getMessage());
+            System.err.println("[Elisabetha] Error al iniciar servidor: " + e.getMessage());
         }
     }
 
-    public synchronized void actualizarEstadoAfinidad(int variacion) {
-        // Protección máxima: Una vez alcanzado el nivel 100, nada puede afectarla
-        if (this.nivelAfinidad == 100) return;
+    public synchronized void actualizarEstadoChispa(int variacion) {
+        if (this.nivelChispa == 100) return;
 
         if (variacion == 75) {
-            nivelAfinidad = 75;
+            nivelChispa = 75;
             encuentroRealizado = true;
-            System.out.println("💫 ¡DESTINO CUMPLIDO! Elisabetha siente la chispa del encuentro con Lance (75 puntos)");
+            System.out.println("[Elisabetha] Encuentro con Lance: +75 puntos");
         } else {
-            int nuevoNivel = nivelAfinidad + variacion;
-            // Límite de 30 antes del encuentro fatídico
+            int nuevoNivel = nivelChispa + variacion;
             if (!encuentroRealizado && variacion > 0) nuevoNivel = Math.min(30, nuevoNivel);
-            nivelAfinidad = Math.max(0, Math.min(100, nuevoNivel));
+            nivelChispa = Math.max(0, Math.min(100, nuevoNivel));
         }
-        System.out.println("🌹 Elisabetha - Nivel de Afinidad: " + nivelAfinidad + " | Encuentro con Lance: " + encuentroRealizado);
+        System.out.println("[Elisabetha] Chispa: " + nivelChispa + " | Encuentro: " + encuentroRealizado);
     }
 
-    public synchronized int obtenerNivelAfinidad() { return nivelAfinidad; }
+    public synchronized int obtenerNivelChispa() { return nivelChispa; }
 
     @Override
     public void run() {
-        while (obtenerNivelAfinidad() < 100) {
+        while (obtenerNivelChispa() < 100) {
             try {
                 int decision = generadorAleatorio.nextInt(4);
                 
@@ -59,12 +58,12 @@ public class DamaElisabetha extends Thread {
                     escaparRecinto();
                 }
                 
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (Exception e) {
-                System.err.println("⚠️ Interrupción en las actividades de Elisabetha");
+                System.err.println("[Elisabetha] Error en actividad principal");
             }
         }
-        System.out.println("🏰 Elisabetha ha alcanzado la iluminación perfecta y aguarda en la torre principal.");
+        System.out.println("[Elisabetha] Chispa maxima alcanzada (100).");
         cerrarServidor();
     }
 
@@ -77,49 +76,51 @@ public class DamaElisabetha extends Thread {
                     
                     String mensaje = lector.readLine();
                     if (mensaje != null) {
-                        procesarMensajeDama(mensaje);
+                        colaMensajesDamas.offer(mensaje);
                         escritor.println("RECIBIDO");
                     }
                 }
             } catch (IOException e) {
                 if (servidorActivo) {
-                    System.err.println("⚠️ Error接收消息: " + e.getMessage());
+                    System.err.println("[Elisabetha] Error al recibir mensaje: " + e.getMessage());
                 }
             }
         }
     }
 
-    private void procesarMensajeDama(String mensaje) {
-        if ("MURMURIO".equals(mensaje)) {
-            actualizarEstadoAfinidad(-5);
-            System.out.println("🤫 Elisabetha escuchó un murmullo perturbador (-5 afinidad)");
+    private void atenderDoncellas() throws InterruptedException {
+        Thread.sleep(4000);
+        String mensaje = colaMensajesDamas.poll();
+        if (mensaje != null) {
+            if ("MURMURIO".equals(mensaje)) {
+                actualizarEstadoChispa(-5);
+                System.out.println("[Elisabetha] Rumor recibido de una dama (-5 chispa)");
+            } else {
+                System.out.println("[Elisabetha] Confidencia recibida (sin efecto)");
+            }
+        } else {
+            System.out.println("[Elisabetha] Ninguna dama tiene nada que contarle");
         }
     }
 
-    private void atenderDoncellas() throws InterruptedException {
-        Thread.sleep(4000);
-        System.out.println("👥 Elisabetha atiende a sus doncellas en los jardines del castillo");
-    }
-
     private void acudirEventoReal() throws InterruptedException {
-        // Solo el 20% de las veces asiste inevitablemente
         if (generadorAleatorio.nextDouble() < 0.20) {
             Thread.sleep(5000);
-            actualizarEstadoAfinidad(-5);
-            System.out.println("💃 Elisabetha fue convocada al baile real contra su voluntad (-5 afinidad)");
+            actualizarEstadoChispa(-5);
+            System.out.println("[Elisabetha] Baile real obligado (-5 chispa)");
         } else {
-            System.out.println("🌙 Elisabetha eludió hábilmente la convocatoria al baile real");
+            System.out.println("[Elisabetha] Evito el baile real");
         }
     }
 
     private void estudiarTomosAntiguos() throws InterruptedException {
         Thread.sleep(5000);
         if (generadorAleatorio.nextDouble() < 0.5) {
-            actualizarEstadoAfinidad(-7);
-            System.out.println("📚 Los tomos soporíferos agotaron a Elisabetha (-7 afinidad)");
+            actualizarEstadoChispa(-7);
+            System.out.println("[Elisabetha] Lectura agotadora (-7 chispa)");
         } else {
-            actualizarEstadoAfinidad(5);
-            System.out.println("⚔️ Las leyendas de caballeros inspiraron a Elisabetha (+5 afinidad)");
+            actualizarEstadoChispa(5);
+            System.out.println("[Elisabetha] Lectura inspiradora (+5 chispa)");
         }
     }
 
@@ -137,9 +138,9 @@ public class DamaElisabetha extends Thread {
             
             Thread.sleep(5000);
             String articulo = lector.readLine();
-            System.out.println("🛍️ Elisabetha adquirió en la plaza: " + articulo);
+            System.out.println("[Elisabetha] Compra en mercado: " + articulo);
         } catch (Exception e) {
-            System.err.println("⚠️ Elisabetha no pudo completar su visita al mercado");
+            System.err.println("[Elisabetha] Error al visitar mercado");
         }
     }
 
@@ -152,10 +153,10 @@ public class DamaElisabetha extends Thread {
             String respuesta = lector.readLine();
             if (respuesta != null && !respuesta.equals("0")) {
                 int puntos = Integer.parseInt(respuesta);
-                actualizarEstadoAfinidad(puntos == 75 ? 75 : 10);
+                actualizarEstadoChispa(puntos == 75 ? 75 : 10);
             }
         } catch (Exception e) {
-            System.err.println("⚠️ Elisabetha no pudo acceder al descanso de guerreros");
+            System.err.println("[Elisabetha] Error al acceder a taberna");
         }
     }
 
@@ -166,7 +167,7 @@ public class DamaElisabetha extends Thread {
                 servidorPersonal.close();
             }
         } catch (IOException e) {
-            System.err.println("⚠️ Error al cerrar el servidor personal de Elisabetha");
+            System.err.println("[Elisabetha] Error al cerrar servidor");
         }
     }
 }

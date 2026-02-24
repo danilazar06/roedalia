@@ -14,7 +14,7 @@ public class Hechicero extends Thread {
     public Hechicero(DamaElisabetha e, CaballeroLance l) {
         this.dama = e;
         this.caballero = l;
-        System.out.println("🧪 Un hechicero oscuro ha llegado a Roedalia con intenciones misteriosas");
+        System.out.println("[Alquimista] Iniciado");
     }
 
     @Override
@@ -33,14 +33,14 @@ public class Hechicero extends Thread {
                 
                 Thread.sleep(100);
             } catch (Exception e) {
-                System.err.println("⚠️ El hechicero fue interrumpido en sus artes oscuras");
+                System.err.println("[Alquimista] Error en actividad");
             }
         }
     }
 
     private void investigarGrimorios() {
         try {
-            System.out.println("📖 El hechicero estudia grimorios antiguos en su torre (30 segundos)...");
+            System.out.println("[Alquimista] Preparando pociones (30s)...");
             Thread.sleep(30000);
             
             double resultado = generadorAleatorio.nextDouble();
@@ -49,7 +49,7 @@ public class Hechicero extends Thread {
             } else if (resultado < 0.60) {
                 invocarDeposito("ALMACENAR_L");
             } else {
-                System.out.println("💥 El hechicero fracasa en su conjuro (40% de probabilidad)");
+                System.out.println("[Alquimista] Pocion fallida");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -59,52 +59,50 @@ public class Hechicero extends Thread {
     private void visitarDama() {
         if (invocarDeposito("RETIRAR_E")) {
             try {
-                System.out.println("🌹 El hechicero se acerca a la torre de Elisabetha con un frasco misterioso...");
+                System.out.println("[Alquimista] Visitando a Elisabetha (5s)...");
                 Thread.sleep(5000);
 
                 if (generadorAleatorio.nextDouble() < 0.30) {
-                    dama.actualizarEstadoAfinidad(-20);
-                    System.out.println("🎭 ¡Éxito! Elisabetha bebió el elixir de belleza engañoso (-20 afinidad)");
+                    dama.actualizarEstadoChispa(-20);
+                    System.out.println("[Alquimista] Elisabetha acepto pocima (-20 chispa)");
                 } else {
-                    System.out.println("🛡️ ¡Lamentos! Elisabetha detectó el engaño y rechazó el elixir");
+                    System.out.println("[Alquimista] Elisabetha rechazo la pocima");
                 }
             } catch (Exception e) {
-                System.err.println("⚠️ El hechicero no pudo completar su visita a Elisabetha");
+                System.err.println("[Alquimista] Error visitando a Elisabetha");
             }
         } else {
-            System.out.println("🧪 El hechicero no tiene elixires disponibles para Elisabetha");
+            System.out.println("[Alquimista] Sin pociones para Elisabetha");
         }
     }
 
     private void visitarCaballero() {
-        if (invocarDeposito("RETIRAR_L")) {
-            try {
-                System.out.println("⚔️ El hechicero convoca a Lance con noticias urgentes...");
-                Thread.sleep(7000);
+        try {
+            System.out.println("[Alquimista] Visitando a Lance (7s)...");
+            Thread.sleep(7000);
 
-                double estrategia = generadorAleatorio.nextDouble();
-                if (estrategia < 0.80) {
-                    // Estrategia de engaño (80%)
+            double estrategia = generadorAleatorio.nextDouble();
+            if (estrategia < 0.80) {
+                if (invocarDeposito("RETIRAR_L")) {
                     if (generadorAleatorio.nextDouble() < 0.20) {
-                        caballero.actualizarEstadoAfinidad(-20);
-                        System.out.println("🎭 Lance cree haber fallado al reino (-20 afinidad)");
+                        caballero.actualizarEstadoChispa(-20);
+                        System.out.println("[Alquimista] Lance afectado por pocima (-20 chispa)");
                     } else {
-                        System.out.println("🛡️ Lance ignoró las falsas acusaciones del hechicero");
+                        System.out.println("[Alquimista] Lance resistio la pocima");
                     }
                 } else {
-                    // Amenaza del Frente Norte (20%)
-                    if (generadorAleatorio.nextDouble() < 0.20) {
-                        caballero.actualizarEstadoAfinidad(-30);
-                        System.out.println("❄️ Lance teme la amenaza del Frente Norte (-30 afinidad)");
-                    } else {
-                        System.out.println("💪 Lance no se dejó amedrentar por las amenazas");
-                    }
+                    System.out.println("[Alquimista] Sin pociones para Lance");
                 }
-            } catch (Exception e) {
-                System.err.println("⚠️ El hechicero no pudo completar su visita a Lance");
+            } else {
+                if (generadorAleatorio.nextDouble() < 0.20) {
+                    caballero.actualizarEstadoChispa(-30);
+                    System.out.println("[Alquimista] Lance afectado por amenaza del Frente Norte (-30 chispa)");
+                } else {
+                    System.out.println("[Alquimista] Lance resistio la amenaza");
+                }
             }
-        } else {
-            System.out.println("🧪 El hechicero no tiene argumentos disponibles para Lance");
+        } catch (Exception e) {
+            System.err.println("[Alquimista] Error visitando a Lance");
         }
     }
 
@@ -117,7 +115,7 @@ public class Hechicero extends Thread {
             String respuesta = lector.readLine();
             return "true".equals(respuesta);
         } catch (Exception e) {
-            System.err.println("⚠️ El hechicero no pudo contactar el depósito de pociones: " + e.getMessage());
+            System.err.println("[Alquimista] Error al contactar deposito: " + e.getMessage());
             return false;
         }
     }

@@ -1,8 +1,7 @@
 package clientes;
 
-import comun.Constantes;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import configuracion.ParametrosReino;
+import java.io.*;
 import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -24,11 +23,6 @@ public class Lance extends Thread {
         }
 
         int ajuste = n;
-        if (ajuste == -20) {
-            ajuste = -10;
-        } else if (ajuste <= -30) {
-            ajuste = -15;
-        }
 
         if (ajuste == 75) {
             gradoDeVinculo = 75;
@@ -49,8 +43,8 @@ public class Lance extends Thread {
             gradoDeVinculo = resultado;
         }
 
-        System.out.println("Caballero Lance - Chispa actual: " + gradoDeVinculo
-                + " | Encuentro en Taberna: " + cruceOriginalRealizado);
+        System.out.println("[Lance] Chispa: " + gradoDeVinculo
+                + " | Encuentro: " + cruceOriginalRealizado);
     }
 
     public synchronized int getChispa() {
@@ -71,7 +65,7 @@ public class Lance extends Thread {
             } catch (Exception ignorada) {
             }
         }
-        System.out.println("Caballero Lance ha alcanzado el nivel maximo de chispa (100). Su destino se ha cumplido.");
+        System.out.println("[Lance] Chispa maxima alcanzada (100).");
     }
 
     private void dialogarConGuardia() throws InterruptedException {
@@ -102,33 +96,35 @@ public class Lance extends Thread {
     }
 
     private void inspeccionarAcceso() {
-        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_PORTON);
-             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
-             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
+        try (Socket enlace = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_BARRERA_NORTE);
+             PrintWriter escritor = new PrintWriter(enlace.getOutputStream(), true);
+             BufferedReader lector = new BufferedReader(new InputStreamReader(enlace.getInputStream()))) {
 
             Thread.sleep(5000);
-            flujoSalida.writeUTF("INSPECCIONAR");
-            flujoEntrada.readUTF();
+            escritor.println("INSPECCIONAR");
+            lector.readLine();
         } catch (Exception ignorada) {
         }
     }
 
     private void acudirATaberna() {
-        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
-             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
-             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
+        try (Socket enlace = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_DESCANSO_GUERRERO);
+             PrintWriter escritor = new PrintWriter(enlace.getOutputStream(), true);
+             BufferedReader lector = new BufferedReader(new InputStreamReader(enlace.getInputStream()))) {
 
-            flujoSalida.writeUTF("Lance");
-            int valorRecibido = flujoEntrada.readInt();
-            if (valorRecibido > 0) {
-                if (valorRecibido == 75) {
-                    modificarChispa(75);
-                } else {
-                    modificarChispa(25);
+            escritor.println("Lance");
+            String respuesta = lector.readLine();
+            if (respuesta != null && !respuesta.equals("0")) {
+                int valorRecibido = Integer.parseInt(respuesta);
+                if (valorRecibido > 0) {
+                    if (valorRecibido == 75) {
+                        modificarChispa(75);
+                    } else {
+                        modificarChispa(10);
+                    }
                 }
             }
         } catch (Exception ignorada) {
         }
     }
 }
-

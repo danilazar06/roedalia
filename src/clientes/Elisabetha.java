@@ -1,8 +1,7 @@
 package clientes;
 
-import comun.Constantes;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import configuracion.ParametrosReino;
+import java.io.*;
 import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -24,9 +23,6 @@ public class Elisabetha extends Thread {
         }
 
         int ajuste = n;
-        if (ajuste <= -20) {
-            ajuste = -10;
-        }
 
         if (ajuste == 75) {
             gradoDeVinculo = 75;
@@ -47,8 +43,8 @@ public class Elisabetha extends Thread {
             gradoDeVinculo = resultado;
         }
 
-        System.out.println("Dama Elisabetha - Chispa actual: " + gradoDeVinculo
-                + " | Encuentro en Taberna: " + cruceOriginalRealizado);
+        System.out.println("[Elisabetha] Chispa: " + gradoDeVinculo
+                + " | Encuentro: " + cruceOriginalRealizado);
     }
 
     public synchronized int getChispa() {
@@ -73,7 +69,7 @@ public class Elisabetha extends Thread {
             } catch (Exception ignorada) {
             }
         }
-        System.out.println("Dama Elisabetha ha alcanzado el nivel maximo de chispa (100). Su destino se ha cumplido.");
+        System.out.println("[Elisabetha] Chispa maxima alcanzada (100).");
     }
 
     private void revisarCorrespondencia() throws InterruptedException {
@@ -89,7 +85,7 @@ public class Elisabetha extends Thread {
         if (probabilidad < 0.20) {
             Thread.sleep(5000);
             modificarChispa(-5);
-            System.out.println("Dama Elisabetha acudio a una velada real y sufrio un leve desgaste (-5).");
+            System.out.println("[Elisabetha] Baile real (-5)");
         }
     }
 
@@ -113,30 +109,32 @@ public class Elisabetha extends Thread {
     }
 
     private void visitarMercado() {
-        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_MERCADO);
-             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
+        try (Socket enlace = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_PLAZA_MERCANTIL);
+             BufferedReader lector = new BufferedReader(new InputStreamReader(enlace.getInputStream()))) {
             Thread.sleep(5000);
-            flujoEntrada.readUTF();
+            lector.readLine();
         } catch (Exception ignorada) {
         }
     }
 
     private void acudirATaberna() {
-        try (Socket enlace = new Socket(Constantes.HOST, Constantes.PUERTO_TABERNA);
-             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
-             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
+        try (Socket enlace = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_DESCANSO_GUERRERO);
+             PrintWriter escritor = new PrintWriter(enlace.getOutputStream(), true);
+             BufferedReader lector = new BufferedReader(new InputStreamReader(enlace.getInputStream()))) {
 
-            flujoSalida.writeUTF("Elisabetha");
-            int valorRecibido = flujoEntrada.readInt();
-            if (valorRecibido > 0) {
-                if (valorRecibido == 75) {
-                    modificarChispa(75);
-                } else {
-                    modificarChispa(25);
+            escritor.println("Elisabetha");
+            String respuesta = lector.readLine();
+            if (respuesta != null && !respuesta.equals("0")) {
+                int valorRecibido = Integer.parseInt(respuesta);
+                if (valorRecibido > 0) {
+                    if (valorRecibido == 75) {
+                        modificarChispa(75);
+                    } else {
+                        modificarChispa(10);
+                    }
                 }
             }
         } catch (Exception ignorada) {
         }
     }
 }
-
