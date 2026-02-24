@@ -31,17 +31,17 @@ public class InicioAventura {
             Thread.currentThread().interrupt();
         }
 
-        new Hechicero(elisabetha, lance).start();
-        new Hechicero(elisabetha, lance).start();
+        new Alquimista(elisabetha, lance).start();
+        new Alquimista(elisabetha, lance).start();
 
-        String[] nombresDoncellas = {"Clara", "Rosa", "Beatriz", "Elena"};
-        for (String nombre : nombresDoncellas) {
-            new Doncella(nombre).start();
+        String[] nombresDamas = {"Lucia", "Carmen", "Ana", "Sara"};
+        for (String nombre : nombresDamas) {
+            new DamaLazo(nombre).start();
         }
 
-        String[] nombresGuardias = {"Gawain", "Bors", "Kay", "Bedivere"};
-        for (String nombre : nombresGuardias) {
-            new GuardiaReal(nombre).start();
+        String[] nombresCaballeros = {"Pablo", "Pedro", "Jorge", "Miguel"};
+        for (String nombre : nombresCaballeros) {
+            new CaballeroPorton(nombre).start();
         }
 
         while (elisabetha.obtenerNivelChispa() < 100 || lance.obtenerNivelChispa() < 100) {

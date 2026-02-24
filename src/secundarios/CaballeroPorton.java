@@ -4,20 +4,19 @@ import configuracion.ParametrosReino;
 import java.io.*;
 import java.net.*;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-public class GuardiaReal extends Thread {
+public class CaballeroPorton extends Thread {
     private String nombre;
     private boolean herido = false;
     private Random generadorAleatorio = new Random();
 
-    public GuardiaReal(String n) { 
-        this.nombre = n; 
+    public CaballeroPorton(String n) {
+        this.nombre = n;
         System.out.println("[Caballero del Porton] " + nombre + " iniciado");
     }
 
-    public void recibirHerida() { 
-        herido = true; 
+    public void recibirHerida() {
+        herido = true;
         System.out.println("[Caballero del Porton] " + nombre + " herido");
     }
 
@@ -54,12 +53,12 @@ public class GuardiaReal extends Thread {
         try (Socket conexion = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_SERVIDOR_LANCE);
              PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true);
              BufferedReader lector = new BufferedReader(new InputStreamReader(conexion.getInputStream()))) {
-            
+
             conexion.setSoTimeout(25000);
-            
+
             String mensaje = generadorAleatorio.nextDouble() < 0.25 ? "AFRENTA" : "CONVERSACION";
             escritor.println(mensaje);
-            
+
             String respuesta = lector.readLine();
             if (respuesta != null && respuesta.equals("RECIBIDO")) {
                 System.out.println("[Caballero del Porton] " + nombre + " dialogo con Lance");
@@ -67,7 +66,7 @@ public class GuardiaReal extends Thread {
         } catch (SocketTimeoutException e) {
             System.out.println("[Caballero del Porton] " + nombre + ": timeout con Lance");
         } catch (IOException e) {
-            System.err.println("[Caballero del Porton] " + nombre + " error de conexion: " + e.getMessage());
         }
     }
 }
+

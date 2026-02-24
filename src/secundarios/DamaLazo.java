@@ -4,14 +4,13 @@ import configuracion.ParametrosReino;
 import java.io.*;
 import java.net.*;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-public class Doncella extends Thread {
+public class DamaLazo extends Thread {
     private String nombre;
     private Random generadorAleatorio = new Random();
 
-    public Doncella(String n) { 
-        this.nombre = n; 
+    public DamaLazo(String n) {
+        this.nombre = n;
         System.out.println("[Dama del Lazo] " + nombre + " iniciada");
     }
 
@@ -39,12 +38,12 @@ public class Doncella extends Thread {
         try (Socket conexion = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_SERVIDOR_ELISA);
              PrintWriter escritor = new PrintWriter(conexion.getOutputStream(), true);
              BufferedReader lector = new BufferedReader(new InputStreamReader(conexion.getInputStream()))) {
-            
+
             conexion.setSoTimeout(20000);
-            
+
             String mensaje = generadorAleatorio.nextDouble() < 0.5 ? "MURMURIO" : "CONFIDENCIA";
             escritor.println(mensaje);
-            
+
             String respuesta = lector.readLine();
             if (respuesta != null && respuesta.equals("RECIBIDO")) {
                 System.out.println("[Dama del Lazo] " + nombre + " envio mensaje a Elisabetha");
@@ -52,7 +51,7 @@ public class Doncella extends Thread {
         } catch (SocketTimeoutException e) {
             System.out.println("[Dama del Lazo] " + nombre + ": timeout con Elisabetha");
         } catch (IOException e) {
-            System.err.println("[Dama del Lazo] " + nombre + " error de conexion: " + e.getMessage());
         }
     }
 }
+

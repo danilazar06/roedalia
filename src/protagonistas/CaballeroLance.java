@@ -52,9 +52,11 @@ public class CaballeroLance extends Thread {
                     dialogarCompaneros();
                 } else if (decision == 1) {
                     intentarDesafio();
-                } else {
+                } else if (decision == 2){
                     cumplirVigilancia();
-                }
+                } else {
+                    intentarRobarAlDragon();
+                };
                 
                 Thread.sleep(100);
             } catch (Exception e) {
@@ -113,16 +115,16 @@ public class CaballeroLance extends Thread {
         System.out.println("[Lance] Desafio (5s)");
         Thread.sleep(5000);
         if (generadorAleatorio.nextDouble() < 0.20) {
-            actualizarEstadoChispa(-5);
-            System.out.println("[Lance] Vence pero hiere al oponente (-5 chispa)");
+            actualizarEstadoChispa(-2);
+            System.out.println("[Lance] Vence pero hiere al oponente (-2 chispa)");
         } else {
-            actualizarEstadoChispa(7);
-            System.out.println("[Lance] Vence sin danar al oponente (+7 chispa)");
+            actualizarEstadoChispa(10);
+            System.out.println("[Lance] Vence sin danar al oponente (+10 chispa)");
         }
     }
 
     private void cumplirVigilancia() {
-        if (generadorAleatorio.nextDouble() < 0.5) {
+        if (generadorAleatorio.nextDouble() < 0.3) {
             inspeccionarBarrera();
         } else {
             visitarDescansoGuerrero();
@@ -152,7 +154,7 @@ public class CaballeroLance extends Thread {
             String respuesta = lector.readLine();
             if (respuesta != null && !respuesta.equals("0")) {
                 int puntos = Integer.parseInt(respuesta);
-                actualizarEstadoChispa(puntos == 75 ? 75 : 10);
+                actualizarEstadoChispa(puntos == 75 ? 75 : 15);
             }
         } catch (Exception e) {
             System.err.println("[Lance] Error al acceder a taberna");
@@ -167,6 +169,31 @@ public class CaballeroLance extends Thread {
             }
         } catch (IOException e) {
             System.err.println("[Lance] Error al cerrar servidor");
+        }
+    }
+
+    private void intentarRobarAlDragon() {
+        // Lance se conecta al puerto 5006 (La Guarida del Dragón)
+        try (Socket enlace = new Socket(ParametrosReino.DOMINIO_LOCAL, ParametrosReino.PUERTO_DRAGON);
+             DataOutputStream flujoSalida = new DataOutputStream(enlace.getOutputStream());
+             DataInputStream flujoEntrada = new DataInputStream(enlace.getInputStream())) {
+
+            // 1. Lance avisa de quién es
+            flujoSalida.writeUTF("Caballero Lance");
+
+            // 2. Lance escucha el estado del Dragón
+            String estadoDragon = flujoEntrada.readUTF();
+
+            if (estadoDragon.equals("DORMIDO")) {
+                System.out.println("[Lance] ¡He robado una Escama de Dragon! (+20 de chispa)");
+                actualizarEstadoChispa(20);
+            } else {
+                System.out.println("[Lance] ¡Maldicion, el dragon estaba DESPIERTO y me ha quemado! (-20 de chispa)");
+                actualizarEstadoChispa(-20);
+            }
+
+        } catch (Exception ignorada) {
+            // Si el Dragón no está activo, Lance simplemente no hace nada
         }
     }
 }

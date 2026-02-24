@@ -8,4 +8,5 @@ public class ParametrosReino {
     public static final int PUERTO_DEPOSITO_POCIONES = 5003;
     public static final int PUERTO_SERVIDOR_ELISA = 7001;
     public static final int PUERTO_SERVIDOR_LANCE = 7002;
+    public static final int PUERTO_DRAGON = 5006;
 }

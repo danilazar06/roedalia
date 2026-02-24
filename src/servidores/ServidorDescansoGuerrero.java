@@ -71,7 +71,7 @@ public class ServidorDescansoGuerrero implements Runnable {
                 puntosDelCruce = 75;
                 System.out.println("[Descanso del Guerrero] Primer encuentro entre Elisabetha y Lance");
             } else {
-                puntosDelCruce = 10;
+                puntosDelCruce = 15;
             }
         }
 

@@ -93,8 +93,8 @@ public class DamaElisabetha extends Thread {
         String mensaje = colaMensajesDamas.poll();
         if (mensaje != null) {
             if ("MURMURIO".equals(mensaje)) {
-                actualizarEstadoChispa(-5);
-                System.out.println("[Elisabetha] Rumor recibido de una dama (-5 chispa)");
+                actualizarEstadoChispa(-3);
+                System.out.println("[Elisabetha] Rumor recibido de una dama (-3 chispa)");
             } else {
                 System.out.println("[Elisabetha] Confidencia recibida (sin efecto)");
             }
@@ -104,10 +104,10 @@ public class DamaElisabetha extends Thread {
     }
 
     private void acudirEventoReal() throws InterruptedException {
-        if (generadorAleatorio.nextDouble() < 0.20) {
+        if (generadorAleatorio.nextDouble() < 0.10) {
             Thread.sleep(5000);
-            actualizarEstadoChispa(-5);
-            System.out.println("[Elisabetha] Baile real obligado (-5 chispa)");
+            actualizarEstadoChispa(-3);
+            System.out.println("[Elisabetha] Baile real obligado (-3 chispa)");
         } else {
             System.out.println("[Elisabetha] Evito el baile real");
         }
@@ -115,17 +115,17 @@ public class DamaElisabetha extends Thread {
 
     private void estudiarTomosAntiguos() throws InterruptedException {
         Thread.sleep(5000);
-        if (generadorAleatorio.nextDouble() < 0.5) {
-            actualizarEstadoChispa(-7);
-            System.out.println("[Elisabetha] Lectura agotadora (-7 chispa)");
+        if (generadorAleatorio.nextDouble() < 0.4) {
+            actualizarEstadoChispa(-3);
+            System.out.println("[Elisabetha] Lectura agotadora (-3 chispa)");
         } else {
-            actualizarEstadoChispa(5);
-            System.out.println("[Elisabetha] Lectura inspiradora (+5 chispa)");
+            actualizarEstadoChispa(8);
+            System.out.println("[Elisabetha] Lectura inspiradora (+8 chispa)");
         }
     }
 
     private void escaparRecinto() {
-        if (generadorAleatorio.nextDouble() < 0.5) {
+        if (generadorAleatorio.nextDouble() < 0.3) {
             explorarMercado();
         } else {
             visitarDescansoGuerrero();
@@ -153,7 +153,7 @@ public class DamaElisabetha extends Thread {
             String respuesta = lector.readLine();
             if (respuesta != null && !respuesta.equals("0")) {
                 int puntos = Integer.parseInt(respuesta);
-                actualizarEstadoChispa(puntos == 75 ? 75 : 10);
+                actualizarEstadoChispa(puntos == 75 ? 75 : 15);
             }
         } catch (Exception e) {
             System.err.println("[Elisabetha] Error al acceder a taberna");
